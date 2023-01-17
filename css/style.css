@@ -6,14 +6,18 @@ header{
   text-align: center;
 }
 form {
+  border: 1px solid #ccc;
+  border-radius: 15px;
+  width: 500px;
   float: left;
-  margin: 20px;
+  margin: 30px;
+  padding: 20px;
 }
 
 table{
-  float: right;
+  float: left;
   width: 60%;
-  margin-right: 20px ;
+  margin: 30px ;
 }
 
 ol{
@@ -29,7 +33,7 @@ ol{
 }
 
 li{
-  margin-bottom: 10px;
+  margin: 20px 0;
 }
 
 label{
@@ -42,6 +46,7 @@ input{
 }
 
 .btn-register{
+  text-align: center;
   background-color: rgb(27, 117, 117);
   border: none;
   color: #ffffff;
@@ -51,12 +56,11 @@ input{
 }
 .btn-remove{
   background-color: rgb(162, 54, 54);
-  display: flex;
   border: none;
   color: white;
-  vertical-align: middle;
+  text-align: center;
+  width: 150px;
   padding: 10px 20px;
-  width: 100px;
   border-radius: 25px;
 }
 
@@ -71,6 +75,7 @@ table{
 }
 
 th{
+  min-width: 130px;
   padding: 5px 15px;
   border: 1px solid #ccc;
   background-color: rgb(27, 117, 117);
@@ -87,7 +92,8 @@ tbody , td{
 }
 
 img{
-  max-width: 100px;
+  min-width: 100px;
+  max-width: 200px;
   height: auto;
 }
 
