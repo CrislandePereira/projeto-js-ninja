@@ -1,0 +1,93 @@
+body{
+  font-family: sans-serif;
+}
+
+header{
+  text-align: center;
+}
+form {
+  float: left;
+  margin: 20px;
+}
+
+table{
+  float: right;
+  width: 60%;
+  margin-right: 20px ;
+}
+
+ol{
+  border: 1px solid #ffffff;
+  margin-top: 20px;
+  border-radius: 10px;
+  background-color: rgb(248, 196, 196);
+  list-style: none;
+}
+
+.form{
+  list-style: none;
+}
+
+li{
+  margin-bottom: 10px;
+}
+
+label{
+  display: block;
+}
+
+input{
+  padding: 5px;
+  width: 400px;
+}
+
+.btn-register{
+  background-color: rgb(27, 117, 117);
+  border: none;
+  color: #ffffff;
+  padding: 10px 20px;
+  width: 100px;
+  border-radius: 25px;
+}
+.btn-remove{
+  background-color: rgb(162, 54, 54);
+  display: flex;
+  border: none;
+  color: white;
+  vertical-align: middle;
+  padding: 10px 20px;
+  width: 100px;
+  border-radius: 25px;
+}
+
+button:hover,
+button:focus{
+  background: darkseagreen;
+  cursor: pointer;
+}
+
+table{
+  border-collapse: collapse;
+}
+
+th{
+  padding: 5px 15px;
+  border: 1px solid #ccc;
+  background-color: rgb(27, 117, 117);
+  color: #ffffff;
+  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+  font-size: 16px;
+  font-weight: normal;
+}
+
+tbody , td{
+  padding: 5px 15px;
+  border: 1px solid #ccc;
+  background-color: #ffffff;
+}
+
+img{
+  max-width: 100px;
+  height: auto;
+}
+
