@@ -8,10 +8,12 @@
     var $color = $('[data-js="color"]').get();
     var $plate = $('[data-js="plate"]').get();
     var $listErrors = $('[data-js="list-errors"]').get();
+    var $tableCar = $('[data-js="table-car"]').get();
     var errors = [];
 
     return {
       init: function init() {
+        this.onloadCars();
         this.companyInfo();
         this.initEvents();
       },
@@ -24,21 +26,39 @@
         $('[data-js="remove-car"]').on('click', this.removeCar);
       },
 
-      handleSubmit: function handleSubmit(e){
-        e.preventDefault();
+      onloadCars: function onloadCars(){
+        var get = new XMLHttpRequest();
+        get.open('GET', 'http://localhost:3000/car');
+        get.send();
 
-        app.clearErrors();
-        if(app.validationForm()){
-          var $tableCar = $('[data-js="table-car"]').get();
-          $tableCar.appendChild(app.createNewCar());
-          app.clearForm();
-          app.initRemove();
-        } else {
-          app.viewErrors();
+        get.onreadystatechange = function(e){
+          if(get.readyState === 4 && get.status === 200){
+            var cars = JSON.parse(get.responseText);
+            console.log(cars);
+            cars.forEach(function(car){
+              var $tableCar = $('[data-js="table-car"]').get();
+              $tableCar.appendChild(app.createNewCar(car.image, car.plate, car.year, car.color, car.brand));
+              app.initRemove();
+            });
+          };
         }
       },
 
-      createNewCar: function createNewCar(){
+        handleSubmit: function handleSubmit(e){
+          e.preventDefault();
+
+          app.clearErrors();
+          if(app.validationForm()){
+            app.submitNewCar();
+            app.clearTable();
+            app.onloadCars();
+            app.clearForm();
+          } else {
+            app.viewErrors();
+          }
+        },
+
+      createNewCar: function createNewCar(image, plate, year, color, brand){
         var $fragment = doc.createDocumentFragment();
         var $tr = doc.createElement('tr');
         var $tdImage = doc.createElement('td');
@@ -53,8 +73,10 @@
 
         $tr.setAttribute('data-js', id);
 
-        $image.setAttribute('src', $('[data-js="image"]').get().value);
+        $image.setAttribute('src', image);
         $tdImage.appendChild($image);
+
+        //$tdImage.appendChild(image);
 
         var $btnRemover = doc.createElement('button');
         $btnRemover.textContent = 'Remover';
@@ -63,10 +85,10 @@
         $btnRemover.setAttribute('id', id);
         $tdRemover.appendChild($btnRemover);
 
-        $tdBrand.textContent = $brand.value;
-        $tdYear.textContent = $year.value;
-        $tdPlate.textContent = $plate.value;
-        $tdColor.textContent = $color.value;
+        $tdBrand.textContent = brand;
+        $tdYear.textContent = year;
+        $tdPlate.textContent = plate;
+        $tdColor.textContent = color;
 
         $tr.appendChild($tdImage);
         $tr.appendChild($tdBrand);
@@ -77,6 +99,33 @@
 
         return $fragment.appendChild($tr);
       },
+
+      submitNewCar: function submitNewCar(){
+        var ajax = new XMLHttpRequest();
+        var car = '';
+        ajax.open('POST','http://localhost:3000/car');
+        ajax.setRequestHeader(
+          'Content-Type',
+          'application/x-www-form-urlencoded'
+        );
+        ajax.send('image=' + $image.value
+                  +'&brand=' + $brand.value
+                  +'&year=' + $year.value
+                  +'&plate=' + $plate.value
+                  +'&color=' + $color.value);
+        ajax.onreadystatechange = function(e){
+
+          if(ajax.readyState === 4 && ajax.status === 200){
+            console.log('Carro Cadastrado')
+            console.log(JSON.parse(ajax.responseText), ajax.status);
+            var newCar = JSON.parse(ajax.responseText);
+            car = app.createNewCar(newCar.image, newCar.plate, newCar.year, newCar.color, newCar.brand);
+          }
+
+        };
+        return car;
+      },
+
 
       validationForm: function validationForm(){
         if($image.value === '')
@@ -131,6 +180,10 @@
         });
       },
 
+      clearTable: function(){
+        $tableCar.innerHTML = '';
+      },
+
       clearErrors: function clearErrors(){
         errors = [];
         $listErrors.innerHTML = '';
@@ -154,9 +207,9 @@
         $companyPhone.textContent = data.phone;
       },
 
-        isReady: function isReady(){
-          return this.readyState === 4 && this.status === 200;
-        }
+      isReady: function isReady(){
+        return this.readyState === 4 && this.status === 200;
+      }
     };
   })();
 
