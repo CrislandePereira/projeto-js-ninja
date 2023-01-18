@@ -10,6 +10,7 @@
     var $listErrors = $('[data-js="list-errors"]').get();
     var $tableCar = $('[data-js="table-car"]').get();
     var errors = [];
+    var listCars = [];
 
     return {
       init: function init() {
@@ -34,10 +35,12 @@
         get.onreadystatechange = function(e){
           if(get.readyState === 4 && get.status === 200){
             var cars = JSON.parse(get.responseText);
+            listCars = cars;
+
             console.log(cars);
             cars.forEach(function(car){
               var $tableCar = $('[data-js="table-car"]').get();
-              $tableCar.appendChild(app.createNewCar(car.image, car.plate, car.year, car.color, car.brand));
+              $tableCar.appendChild(app.createNewCar(car.id, car.image, car.plate, car.year, car.color, car.brand));
               app.initRemove();
             });
           };
@@ -58,7 +61,7 @@
           }
         },
 
-      createNewCar: function createNewCar(image, plate, year, color, brand){
+      createNewCar: function createNewCar(id, image, plate, year, color, brand){
         var $fragment = doc.createDocumentFragment();
         var $tr = doc.createElement('tr');
         var $tdImage = doc.createElement('td');
@@ -69,14 +72,10 @@
         var $tdColor = doc.createElement('td');
         var $tdRemover = doc.createElement('td');
 
-        var id = 'carNumber-' + this.generateID();
-
         $tr.setAttribute('data-js', id);
 
         $image.setAttribute('src', image);
         $tdImage.appendChild($image);
-
-        //$tdImage.appendChild(image);
 
         var $btnRemover = doc.createElement('button');
         $btnRemover.textContent = 'Remover';
@@ -103,6 +102,7 @@
       submitNewCar: function submitNewCar(){
         var ajax = new XMLHttpRequest();
         var car = '';
+        var id = 'car-' + this.generateID();
         ajax.open('POST','http://localhost:3000/car');
         ajax.setRequestHeader(
           'Content-Type',
@@ -112,7 +112,8 @@
                   +'&brand=' + $brand.value
                   +'&year=' + $year.value
                   +'&plate=' + $plate.value
-                  +'&color=' + $color.value);
+                  +'&color=' + $color.value
+                  + '&id=' + id);
         ajax.onreadystatechange = function(e){
 
           if(ajax.readyState === 4 && ajax.status === 200){
@@ -154,10 +155,21 @@
       },
 
       removeCar: function removeCar(){
-
         var dataJS = '[data-js="id"]'.replace('id', this.id)
         var $car = $(dataJS).get();
-        $car.remove();
+        console.log($car);
+
+        var deleted = new XMLHttpRequest();
+        deleted.open('DELETE','http://localhost:3000/car');
+        deleted.setRequestHeader( 'Content-Type','application/x-www-form-urlencoded' );
+        deleted.send('id=' + this.id);
+        deleted.onreadystatechange = function(e){
+          if(deleted.readyState === 4 && deleted.status === 200){
+            console.log('Carro Deletado com Sucesso!')
+            console.log(JSON.parse(deleted.responseText), deleted.status);
+            $car.remove();
+          }
+        };
       },
 
       clearForm: function clearForm(){
