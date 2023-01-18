@@ -8,10 +8,13 @@
     var $color = $('[data-js="color"]').get();
     var $plate = $('[data-js="plate"]').get();
     var $listErrors = $('[data-js="list-errors"]').get();
+    var $tableCar = $('[data-js="table-car"]').get();
     var errors = [];
+    var listCars = [];
 
     return {
       init: function init() {
+        this.onloadCars();
         this.companyInfo();
         this.initEvents();
       },
@@ -24,21 +27,41 @@
         $('[data-js="remove-car"]').on('click', this.removeCar);
       },
 
-      handleSubmit: function handleSubmit(e){
-        e.preventDefault();
+      onloadCars: function onloadCars(){
+        var get = new XMLHttpRequest();
+        get.open('GET', 'http://localhost:3000/car');
+        get.send();
 
-        app.clearErrors();
-        if(app.validationForm()){
-          var $tableCar = $('[data-js="table-car"]').get();
-          $tableCar.appendChild(app.createNewCar());
-          app.clearForm();
-          app.initRemove();
-        } else {
-          app.viewErrors();
+        get.onreadystatechange = function(e){
+          if(get.readyState === 4 && get.status === 200){
+            var cars = JSON.parse(get.responseText);
+            listCars = cars;
+
+            console.log(cars);
+            cars.forEach(function(car){
+              var $tableCar = $('[data-js="table-car"]').get();
+              $tableCar.appendChild(app.createNewCar(car.id, car.image, car.plate, car.year, car.color, car.brand));
+              app.initRemove();
+            });
+          };
         }
       },
 
-      createNewCar: function createNewCar(){
+        handleSubmit: function handleSubmit(e){
+          e.preventDefault();
+
+          app.clearErrors();
+          if(app.validationForm()){
+            app.submitNewCar();
+            app.clearTable();
+            app.onloadCars();
+            app.clearForm();
+          } else {
+            app.viewErrors();
+          }
+        },
+
+      createNewCar: function createNewCar(id, image, plate, year, color, brand){
         var $fragment = doc.createDocumentFragment();
         var $tr = doc.createElement('tr');
         var $tdImage = doc.createElement('td');
@@ -49,11 +72,9 @@
         var $tdColor = doc.createElement('td');
         var $tdRemover = doc.createElement('td');
 
-        var id = 'carNumber-' + this.generateID();
-
         $tr.setAttribute('data-js', id);
 
-        $image.setAttribute('src', $('[data-js="image"]').get().value);
+        $image.setAttribute('src', image);
         $tdImage.appendChild($image);
 
         var $btnRemover = doc.createElement('button');
@@ -63,10 +84,10 @@
         $btnRemover.setAttribute('id', id);
         $tdRemover.appendChild($btnRemover);
 
-        $tdBrand.textContent = $brand.value;
-        $tdYear.textContent = $year.value;
-        $tdPlate.textContent = $plate.value;
-        $tdColor.textContent = $color.value;
+        $tdBrand.textContent = brand;
+        $tdYear.textContent = year;
+        $tdPlate.textContent = plate;
+        $tdColor.textContent = color;
 
         $tr.appendChild($tdImage);
         $tr.appendChild($tdBrand);
@@ -77,6 +98,35 @@
 
         return $fragment.appendChild($tr);
       },
+
+      submitNewCar: function submitNewCar(){
+        var ajax = new XMLHttpRequest();
+        var car = '';
+        var id = 'car-' + this.generateID();
+        ajax.open('POST','http://localhost:3000/car');
+        ajax.setRequestHeader(
+          'Content-Type',
+          'application/x-www-form-urlencoded'
+        );
+        ajax.send('image=' + $image.value
+                  +'&brand=' + $brand.value
+                  +'&year=' + $year.value
+                  +'&plate=' + $plate.value
+                  +'&color=' + $color.value
+                  + '&id=' + id);
+        ajax.onreadystatechange = function(e){
+
+          if(ajax.readyState === 4 && ajax.status === 200){
+            console.log('Carro Cadastrado')
+            console.log(JSON.parse(ajax.responseText), ajax.status);
+            var newCar = JSON.parse(ajax.responseText);
+            car = app.createNewCar(newCar.image, newCar.plate, newCar.year, newCar.color, newCar.brand);
+          }
+
+        };
+        return car;
+      },
+
 
       validationForm: function validationForm(){
         if($image.value === '')
@@ -105,10 +155,21 @@
       },
 
       removeCar: function removeCar(){
-
         var dataJS = '[data-js="id"]'.replace('id', this.id)
         var $car = $(dataJS).get();
-        $car.remove();
+        console.log($car);
+
+        var deleted = new XMLHttpRequest();
+        deleted.open('DELETE','http://localhost:3000/car');
+        deleted.setRequestHeader( 'Content-Type','application/x-www-form-urlencoded' );
+        deleted.send('id=' + this.id);
+        deleted.onreadystatechange = function(e){
+          if(deleted.readyState === 4 && deleted.status === 200){
+            console.log('Carro Deletado com Sucesso!')
+            console.log(JSON.parse(deleted.responseText), deleted.status);
+            $car.remove();
+          }
+        };
       },
 
       clearForm: function clearForm(){
@@ -129,6 +190,10 @@
           $li.textContent = element;
           $listErrors.appendChild($li);
         });
+      },
+
+      clearTable: function(){
+        $tableCar.innerHTML = '';
       },
 
       clearErrors: function clearErrors(){
@@ -154,9 +219,9 @@
         $companyPhone.textContent = data.phone;
       },
 
-        isReady: function isReady(){
-          return this.readyState === 4 && this.status === 200;
-        }
+      isReady: function isReady(){
+        return this.readyState === 4 && this.status === 200;
+      }
     };
   })();
 
